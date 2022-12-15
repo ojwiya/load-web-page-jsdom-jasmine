@@ -5,11 +5,11 @@ const { serverListening } = require('server-listening');
 const { JSDOM } = require('jsdom');
 
 // Setup
-const url = 'https://pretty-print-json.js.org/';
+const url = 'file:///home/projects/github-rcyqjx/index.html';
 const jsdomOptions = { resources: 'usable', runScripts: 'dangerously' };
 let dom;
 const loadWebPage = () =>
-  JSDOM.fromURL(url, jsdomOptions)
+  JSDOM.fromFile('index.html', jsdomOptions)
     .then(serverListening.jsdomOnLoad)
     .then((jsdom) => (dom = jsdom));
 const closeWebPage = () => serverListening.jsdomCloseWindow(dom);
@@ -25,14 +25,12 @@ describe('The web page', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('has exactly one header, main, and footer', () => {
+  it('has exactly one header', () => {
     const $ = dom.window.$;
     const actual = {
-      header: $('body >header').length,
-      main: $('body >main').length,
-      footer: $('body >footer').length,
+      header: $(':header').length,
     };
-    const expected = { header: 1, main: 1, footer: 1 };
+    const expected = { header: 1 };
     expect(actual).toEqual(expected);
   });
 });
@@ -42,10 +40,13 @@ describe('The document content', () => {
   beforeAll(loadWebPage);
   afterAll(closeWebPage);
 
-  it('has a 🚀 traveling to 🪐!', () => {
+  it('has a first name input', () => {
     const html = dom.window.document.documentElement.outerHTML;
-    const actual = { '🚀': !!html.match(/🚀/g), '🪐': !!html.match(/🪐/g) };
-    const expected = { '🚀': true, '🪐': true };
+    const $ = dom.window.$;
+    const actual = $('#fname').val();
+
+    const expected = 'John';
+
     expect(actual).toEqual(expected);
   });
 });
